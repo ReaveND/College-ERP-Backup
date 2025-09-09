@@ -27,4 +27,7 @@ jobs:
           git add .
           git commit -m "Backup from College-ERP on $(date)"
           git remote set-url origin https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP-Backup.git
+          - name: Set remote with PAT
+            run: |
+              git remote set-url origin https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP-Backup.git
           git push origin main
