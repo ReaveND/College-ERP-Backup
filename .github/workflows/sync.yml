@@ -31,6 +31,10 @@ jobs:
 
       - name: Commit and Push to Repo B
         run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
           git add .
-          git commit -m "Backup from College-ERP on $(date)"
+          git commit -m "Backup from College-ERP on $(date)" || echo "No changes to commit"
+          git remote set-url origin https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP-Backup.git
+          git remote -v
           git push origin main
