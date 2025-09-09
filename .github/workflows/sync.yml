@@ -28,13 +28,10 @@ jobs:
 
       - name: Purge leftover submodule metadata
         run: |
-          # if .gitmodules exists, remove it
           if [ -f .gitmodules ]; then
             git rm --cached .gitmodules
             rm .gitmodules
           fi
-
-          # unstage any stale 'college-erp' entry
           git rm --cached college-erp || true
 
       - name: Commit, Tag & Push to Repo B via PAT
@@ -44,10 +41,20 @@ jobs:
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
+          # Commit any new backup files
           git add .
           git commit -m "Backup from College-ERP on $(date)" || echo "No changes to commit"
 
+          # Build a date-based tag
           TAG="backup-$(date +%F)"
-          git tag $TAG
 
-          git push https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git HEAD:main --tags
+          # Check if the tag already exists on remote
+          if git ls-remote --exit-code --tags "https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git" "refs/tags/$TAG"; then
+            echo "Tag $TAG already exists on remote, skipping tag creation."
+          else
+            git tag "$TAG"
+            git push "https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git" "$TAG"
+          fi
+
+          # Finally push the commit to main
+          git push "https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git" HEAD:main
