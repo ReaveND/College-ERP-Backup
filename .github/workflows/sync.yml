@@ -17,10 +17,24 @@ jobs:
         run: |
           git clone https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP.git college-erp
 
-      - name: Create backup folder and copy files
+      - name: Create snapshot and capture deletions
         run: |
-          mkdir -p backups/$(date +%F)
-          rsync -av --exclude='.git' college-erp/ backups/$(date +%F)/
+          # define snapshot and deletions dirs (deletions outside of snapshots)
+          SNAPSHOT="backups/$(date +%F)"
+          DELETIONS="deletions/$(date +%F)"
+
+          # ensure both exist
+          mkdir -p "$SNAPSHOT" "$DELETIONS"
+
+          # rsync: mirror source into snapshot
+          #         delete removed files from snapshot
+          #         move those deleted/overwritten files into DELETIONS
+          rsync -av \
+            --delete \
+            --backup \
+            --backup-dir="$DELETIONS" \
+            --exclude='.git' \
+            college-erp/ "$SNAPSHOT"/
 
       - name: Remove temporary clone
         run: |
@@ -41,20 +55,16 @@ jobs:
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          # Commit any new backup files
           git add .
           git commit -m "Backup from College-ERP on $(date)" || echo "No changes to commit"
 
-          # Build a date-based tag
           TAG="backup-$(date +%F)"
 
-          # Check if the tag already exists on remote
           if git ls-remote --exit-code --tags "https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git" "refs/tags/$TAG"; then
-            echo "Tag $TAG already exists on remote, skipping tag creation."
+            echo "Tag $TAG already exists, skipping."
           else
             git tag "$TAG"
             git push "https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git" "$TAG"
           fi
 
-          # Finally push the commit to main
           git push "https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git" HEAD:main
