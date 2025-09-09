@@ -22,6 +22,10 @@ jobs:
           mkdir -p backups/$(date +%F)
           rsync -av --exclude='.git' college-erp/ backups/$(date +%F)/
 
+      - name: Remove temporary clone
+        run: |
+          rm -rf college-erp
+
       - name: Commit, Tag & Push to Repo B via PAT
         env:
           TOKEN: ${{ secrets.COLLEGE_ERP_PAT }}
