@@ -26,14 +26,28 @@ jobs:
         run: |
           rm -rf college-erp
 
+      - name: Purge leftover submodule metadata
+        run: |
+          # if .gitmodules exists, remove it
+          if [ -f .gitmodules ]; then
+            git rm --cached .gitmodules
+            rm .gitmodules
+          fi
+
+          # unstage any stale 'college-erp' entry
+          git rm --cached college-erp || true
+
       - name: Commit, Tag & Push to Repo B via PAT
         env:
           TOKEN: ${{ secrets.COLLEGE_ERP_PAT }}
         run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
+
           git add .
           git commit -m "Backup from College-ERP on $(date)" || echo "No changes to commit"
+
           TAG="backup-$(date +%F)"
           git tag $TAG
+
           git push https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git HEAD:main --tags
