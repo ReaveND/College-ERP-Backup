@@ -37,7 +37,5 @@ jobs:
           git config user.email "action@github.com"
           git add .
           git commit -m "Backup from College-ERP on $(date)" || echo "No changes to commit"
-          git remote set-url origin https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git
           git remote -v
           git push https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git HEAD:main
-
