@@ -18,16 +18,19 @@ jobs:
       - name: Create backup folder and copy files
         run: |
           mkdir -p backups/$(date +%F)
-          cp -r college-erp/* backups/$(date +%F)/
+          rsync -av --exclude='.git' college-erp/ backups/$(date +%F)/
 
-      - name: Commit and Push to Repo B
+      - name: Configure Git
         run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
+
+      - name: Set remote with PAT
+        run: |
+          git remote set-url origin https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP-Backup.git
+
+      - name: Commit and Push to Repo B
+        run: |
           git add .
           git commit -m "Backup from College-ERP on $(date)"
-          git remote set-url origin https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP-Backup.git
-          - name: Set remote with PAT
-            run: |
-              git remote set-url origin https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP-Backup.git
           git push origin main
