@@ -22,7 +22,7 @@ jobs:
           mkdir -p backups/$(date +%F)
           rsync -av --exclude='.git' college-erp/ backups/$(date +%F)/
 
-      - name: Commit and Push to Repo B via PAT
+      - name: Commit, Tag & Push to Repo B
         env:
           TOKEN: ${{ secrets.COLLEGE_ERP_PAT }}
         run: |
@@ -30,4 +30,7 @@ jobs:
           git config user.email "action@github.com"
           git add .
           git commit -m "Backup from College-ERP on $(date)" || echo "No changes to commit"
-          git push https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git HEAD:main
+          TAG="backup-$(date +%F)"
+          git tag $TAG
+          git push https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git HEAD:main --tags
+
