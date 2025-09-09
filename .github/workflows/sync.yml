@@ -1,0 +1,29 @@
+name: Receive Backup from College-ERP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  pull-backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo B
+        uses: actions/checkout@v3
+
+      - name: Clone College-ERP Repo
+        run: |
+          git clone https://<your-username>:${{ secrets.COLLEGE_ERP_PAT }}@github.com/<your-username>/College-ERP.git college-erp
+
+      - name: Create backup folder and copy files
+        run: |
+          mkdir -p backups/$(date +%F)
+          cp -r college-erp/* backups/$(date +%F)/
+
+      - name: Commit and Push to Repo B
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add .
+          git commit -m "Backup from College-ERP on $(date)"
+          git push origin main
