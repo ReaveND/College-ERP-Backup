@@ -8,8 +8,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo B
+      - name: Checkout Repo B (without GITHUB_TOKEN)
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Clone College-ERP Repo
         run: |
@@ -20,16 +22,7 @@ jobs:
           mkdir -p backups/$(date +%F)
           rsync -av --exclude='.git' college-erp/ backups/$(date +%F)/
 
-      - name: Configure Git
-        run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
-
-      - name: Set remote with PAT
-        run: |
-          git remote set-url origin https://ReaveND:${{ secrets.COLLEGE_ERP_PAT }}@github.com/ReaveND/College-ERP-Backup.git
-
-      - name: Commit and Push to Repo B
+      - name: Commit and Push to Repo B via PAT
         env:
           TOKEN: ${{ secrets.COLLEGE_ERP_PAT }}
         run: |
@@ -37,5 +30,4 @@ jobs:
           git config user.email "action@github.com"
           git add .
           git commit -m "Backup from College-ERP on $(date)" || echo "No changes to commit"
-          git remote -v
           git push https://ReaveND:${TOKEN}@github.com/ReaveND/College-ERP-Backup.git HEAD:main
